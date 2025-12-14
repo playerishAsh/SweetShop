@@ -24,6 +24,44 @@ export async function updateSweet(id: number, data: Partial<{ name: string; cate
   return updated;
 }
 
+export async function purchaseSweet(id: number, quantity?: number) {
+  if (quantity === undefined || typeof quantity !== 'number' || quantity <= 0) {
+    const err: any = new Error('Invalid quantity');
+    err.status = 400;
+    throw err;
+  }
+
+  const updated = await repo.purchaseSweet(id, quantity);
+  if (updated) return updated;
+
+  // determine if it's because the sweet doesn't exist or insufficient stock
+  const existing = await repo.findSweetById(id);
+  if (!existing) {
+    const err: any = new Error('Not found');
+    err.status = 404;
+    throw err;
+  }
+
+  const err: any = new Error('Insufficient stock');
+  err.status = 400;
+  throw err;
+}
+
+export async function restockSweet(id: number, quantity?: number) {
+  if (quantity === undefined || typeof quantity !== 'number' || quantity <= 0) {
+    const err: any = new Error('Invalid quantity');
+    err.status = 400;
+    throw err;
+  }
+
+  const updated = await repo.restockSweet(id, quantity);
+  if (updated) return updated;
+
+  const err: any = new Error('Not found');
+  err.status = 404;
+  throw err;
+}
+
 export async function deleteSweet(id: number) {
   const ok = await repo.deleteSweet(id);
   if (!ok) {

@@ -43,3 +43,31 @@ export async function deleteHandler(req: Request, res: Response) {
     res.status(500).json({ error: 'Internal error' });
   }
 }
+
+export async function purchaseHandler(req: Request, res: Response) {
+  try {
+    const id = Number(req.params.id);
+    const quantity = req.body.quantity;
+    const updated = await service.purchaseSweet(id, quantity);
+    res.json(updated);
+  } catch (err: any) {
+    if (err && err.status) return res.status(err.status).json({ error: err.message });
+    // eslint-disable-next-line no-console
+    console.error(err);
+    res.status(500).json({ error: 'Internal error' });
+  }
+}
+
+export async function restockHandler(req: Request, res: Response) {
+  try {
+    const id = Number(req.params.id);
+    const quantity = req.body.quantity;
+    const updated = await service.restockSweet(id, quantity);
+    res.json(updated);
+  } catch (err: any) {
+    if (err && err.status) return res.status(err.status).json({ error: err.message });
+    // eslint-disable-next-line no-console
+    console.error(err);
+    res.status(500).json({ error: 'Internal error' });
+  }
+}

@@ -45,3 +45,19 @@ export async function deleteSweet(id: number): Promise<boolean> {
   // rowCount can be null in pool typings, guard using nullish coalescing
   return (res.rowCount ?? 0) > 0;
 }
+
+export async function purchaseSweet(id: number, quantity: number): Promise<SweetRecord | null> {
+  const res = await pool.query(
+    'UPDATE sweets SET quantity = quantity - $2 WHERE id = $1 AND quantity >= $2 RETURNING id, name, category, price, quantity',
+    [id, quantity]
+  );
+  return res.rows[0] ?? null;
+}
+
+export async function restockSweet(id: number, quantity: number): Promise<SweetRecord | null> {
+  const res = await pool.query(
+    'UPDATE sweets SET quantity = quantity + $2 WHERE id = $1 RETURNING id, name, category, price, quantity',
+    [id, quantity]
+  );
+  return res.rows[0] ?? null;
+}
