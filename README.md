@@ -23,3 +23,10 @@ npm test
 
 The tests create and drop a `users` table during their lifecycle; ensure your test DB
 is isolated from production data.
+
+PowerShell example:
+
+```powershell
+$env:DATABASE_URL = "postgres://user:password@localhost:5432/sweetshop_test"
+npm test
+```

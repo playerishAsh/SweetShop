@@ -3,6 +3,16 @@ import app from '../../src/app';
 import { pool } from '../../src/db';
 import bcrypt from 'bcrypt';
 
+// Fast-fail with clear instructions if DATABASE_URL is not provided.
+if (!process.env.DATABASE_URL) {
+  throw new Error(
+    'DATABASE_URL is not set. Set it to your test PostgreSQL DB before running these integration tests. Example (cmd.exe):\n' +
+      'set DATABASE_URL=postgres://user:password@localhost:5432/sweetshop_test\n' +
+      'Or (PowerShell): $env:DATABASE_URL="postgres://user:password@localhost:5432/sweetshop_test"\n' +
+      'See README.md for details.'
+  );
+}
+
 const TEST_EMAIL = 'tuser@example.com';
 const TEST_PASSWORD = 's3cret!';
 
