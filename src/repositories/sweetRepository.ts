@@ -61,3 +61,39 @@ export async function restockSweet(id: number, quantity: number): Promise<SweetR
   );
   return res.rows[0] ?? null;
 }
+
+export async function searchSweets(filters: { name?: string; category?: string; minPrice?: number; maxPrice?: number; }) : Promise<SweetRecord[]> {
+  const conditions: string[] = [];
+  const params: any[] = [];
+  let idx = 1;
+
+  if (filters.name) {
+    conditions.push(`name ILIKE '%' || $${idx} || '%'`);
+    params.push(filters.name);
+    idx++;
+  }
+
+  if (filters.category) {
+    // case-insensitive exact match
+    conditions.push(`LOWER(category) = LOWER($${idx})`);
+    params.push(filters.category);
+    idx++;
+  }
+
+  if (filters.minPrice !== undefined) {
+    conditions.push(`price >= $${idx}`);
+    params.push(filters.minPrice);
+    idx++;
+  }
+
+  if (filters.maxPrice !== undefined) {
+    conditions.push(`price <= $${idx}`);
+    params.push(filters.maxPrice);
+    idx++;
+  }
+
+  const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
+  const sql = `SELECT id, name, category, price, quantity FROM sweets ${where}`;
+  const res = await pool.query(sql, params);
+  return res.rows;
+}

@@ -71,3 +71,21 @@ export async function restockHandler(req: Request, res: Response) {
     res.status(500).json({ error: 'Internal error' });
   }
 }
+
+export async function searchHandler(req: Request, res: Response) {
+  try {
+    const filters = {
+      name: req.query.name as string | undefined,
+      category: req.query.category as string | undefined,
+      minPrice: req.query.minPrice as string | undefined,
+      maxPrice: req.query.maxPrice as string | undefined,
+    };
+    const results = await service.searchSweets(filters as any);
+    res.json(results);
+  } catch (err: any) {
+    if (err && err.status) return res.status(err.status).json({ error: err.message });
+    // eslint-disable-next-line no-console
+    console.error(err);
+    res.status(500).json({ error: 'Internal error' });
+  }
+}

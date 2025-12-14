@@ -62,6 +62,41 @@ export async function restockSweet(id: number, quantity?: number) {
   throw err;
 }
 
+export async function searchSweets(filters: { name?: string; category?: string; minPrice?: any; maxPrice?: any; }) {
+  const { name, category, minPrice, maxPrice } = filters;
+
+  // Validate prices if present
+  if (minPrice !== undefined) {
+    const m = Number(minPrice);
+    if (Number.isNaN(m) || m < 0) {
+      const err: any = new Error('Invalid minPrice');
+      err.status = 400;
+      throw err;
+    }
+    filters.minPrice = m;
+  }
+
+  if (maxPrice !== undefined) {
+    const m = Number(maxPrice);
+    if (Number.isNaN(m) || m < 0) {
+      const err: any = new Error('Invalid maxPrice');
+      err.status = 400;
+      throw err;
+    }
+    filters.maxPrice = m;
+  }
+
+  if (filters.minPrice !== undefined && filters.maxPrice !== undefined) {
+    if (Number(filters.minPrice) > Number(filters.maxPrice)) {
+      const err: any = new Error('minPrice greater than maxPrice');
+      err.status = 400;
+      throw err;
+    }
+  }
+
+  return repo.searchSweets({ name, category, minPrice: filters.minPrice, maxPrice: filters.maxPrice });
+}
+
 export async function deleteSweet(id: number) {
   const ok = await repo.deleteSweet(id);
   if (!ok) {
