@@ -1,3 +1,8 @@
+import request from 'supertest';
+import app from '../../src/app';
+import { pool } from '../../src/db';
+import bcrypt from 'bcrypt';
+
 // Fast-fail with clear instructions if DATABASE_URL is not provided.
 if (!process.env.DATABASE_URL) {
   throw new Error(
@@ -7,11 +12,6 @@ if (!process.env.DATABASE_URL) {
       'See README.md for details.'
   );
 }
-
-import request from 'supertest';
-import app from '../../src/app';
-import { pool } from '../../src/db';
-import bcrypt from 'bcrypt';
 
 const TEST_EMAIL = 'tuser@example.com';
 const TEST_PASSWORD = 's3cret!';
