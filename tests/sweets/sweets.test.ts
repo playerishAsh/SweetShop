@@ -10,8 +10,7 @@ if (!process.env.DATABASE_URL) {
   throw new Error('DATABASE_URL must be set for integration tests');
 }
 
-const app = express();
-app.use(express.json());
+import app from '../../src/app';
 
 const { authMiddleware } = require('../../src/middleware/auth');
 const { authorizeRoles } = require('../../src/middleware/authorize');
@@ -58,9 +57,6 @@ afterAll(async () => {
 
 describe('Sweets API (RBAC + Auth)', () => {
   it('ADMIN can create a sweet (201)', async () => {
-    // wire route
-    app.post('/api/sweets', authMiddleware, authorizeRoles(['ADMIN']), (_req, res) => res.status(201).json({ id: 1, ..._req.body }));
-
     const token = signToken({ userId: 1, role: 'ADMIN' });
     const res = await request(app)
       .post('/api/sweets')
@@ -73,8 +69,6 @@ describe('Sweets API (RBAC + Auth)', () => {
   });
 
   it('USER cannot create a sweet (403)', async () => {
-    app.post('/api/sweets', authMiddleware, authorizeRoles(['ADMIN']), (_req, res) => res.status(201).json({}));
-
     const token = signToken({ userId: 2, role: 'USER' });
     const res = await request(app)
       .post('/api/sweets')
@@ -85,18 +79,13 @@ describe('Sweets API (RBAC + Auth)', () => {
   });
 
   it('Missing required fields returns 400', async () => {
-    app.post('/api/sweets', authMiddleware, authorizeRoles(['ADMIN']), (_req, res) => res.status(201).json({}));
-
     const token = signToken({ userId: 1, role: 'ADMIN' });
     const res = await request(app).post('/api/sweets').set('Authorization', `Bearer ${token}`).send({ name: 'Bad' });
 
-    // Expect handler to validate and return 400, but currently route doesn't validate so test should fail
     expect(res.status).toBe(400);
   });
 
   it('ADMIN and USER can fetch sweets (200) and empty array returned when none', async () => {
-    app.get('/api/sweets', authMiddleware, authorizeRoles(['ADMIN', 'USER']), (_req, res) => res.json([]));
-
     const tokenAdmin = signToken({ userId: 1, role: 'ADMIN' });
     const tokenUser = signToken({ userId: 2, role: 'USER' });
 
@@ -110,15 +99,21 @@ describe('Sweets API (RBAC + Auth)', () => {
   });
 
   it('ADMIN can update sweet (200); USER cannot (403); updating non-existent -> 404', async () => {
-    // stub route for update; in RED phase not implemented
-    app.put('/api/sweets/:id', authMiddleware, authorizeRoles(['ADMIN']), (_req, res) => res.json({ id: Number(_req.params.id), ..._req.body }));
+    // using real app routes
 
     const tokenAdmin = signToken({ userId: 1, role: 'ADMIN' });
     const tokenUser = signToken({ userId: 2, role: 'USER' });
 
-    // Admin updating existing (we'll assume id=1 exists)
-    const resAdmin = await request(app).put('/api/sweets/1').set('Authorization', `Bearer ${tokenAdmin}`).send({ name: 'Updated' });
-    // Expect 200
+    // create a sweet first
+    const create = await request(app)
+      .post('/api/sweets')
+      .set('Authorization', `Bearer ${tokenAdmin}`)
+      .send({ name: 'ToUpdate', category: 'Candy', price: 1.0, quantity: 5 });
+    expect(create.status).toBe(201);
+    const id = create.body.id;
+
+    // Admin updating existing
+    const resAdmin = await request(app).put(`/api/sweets/${id}`).set('Authorization', `Bearer ${tokenAdmin}`).send({ name: 'Updated' });
     expect(resAdmin.status).toBe(200);
 
     // User cannot
@@ -131,12 +126,20 @@ describe('Sweets API (RBAC + Auth)', () => {
   });
 
   it('ADMIN can delete sweet (200 or 204); USER cannot (403); deleting non-existent -> 404', async () => {
-    app.delete('/api/sweets/:id', authMiddleware, authorizeRoles(['ADMIN']), (_req, res) => res.status(200).json({ deleted: Number(_req.params.id) }));
+    // using real app routes
 
     const tokenAdmin = signToken({ userId: 1, role: 'ADMIN' });
     const tokenUser = signToken({ userId: 2, role: 'USER' });
 
-    const resAdmin = await request(app).delete('/api/sweets/1').set('Authorization', `Bearer ${tokenAdmin}`);
+    // create then delete
+    const created = await request(app)
+      .post('/api/sweets')
+      .set('Authorization', `Bearer ${tokenAdmin}`)
+      .send({ name: 'ToDelete', category: 'Candy', price: 0.9, quantity: 2 });
+    expect(created.status).toBe(201);
+    const delId = created.body.id;
+
+    const resAdmin = await request(app).delete(`/api/sweets/${delId}`).set('Authorization', `Bearer ${tokenAdmin}`);
     expect([200, 204]).toContain(resAdmin.status);
 
     const resUser = await request(app).delete('/api/sweets/1').set('Authorization', `Bearer ${tokenUser}`);
@@ -147,14 +150,14 @@ describe('Sweets API (RBAC + Auth)', () => {
   });
 
   it('rejects missing or invalid JWT with 401', async () => {
-    app.get('/api/sweets-protected', authMiddleware, authorizeRoles(['ADMIN', 'USER']), (_req, res) => res.json({ ok: true }));
+    // using real app routes
 
-    // Missing header
-    const resMissing = await request(app).get('/api/sweets-protected');
+    // Missing header -> protected sweets endpoint requires auth
+    const resMissing = await request(app).get('/api/sweets');
     expect(resMissing.status).toBe(401);
 
     // Invalid token
-    const resInvalid = await request(app).get('/api/sweets-protected').set('Authorization', 'Bearer bad.token');
+    const resInvalid = await request(app).get('/api/sweets').set('Authorization', 'Bearer bad.token');
     expect(resInvalid.status).toBe(401);
   });
 });

@@ -42,5 +42,6 @@ export async function updateSweet(id: number, data: Partial<Omit<SweetRecord, 'i
 
 export async function deleteSweet(id: number): Promise<boolean> {
   const res = await pool.query('DELETE FROM sweets WHERE id = $1', [id]);
-  return res.rowCount > 0;
+  // rowCount can be null in pool typings, guard using nullish coalescing
+  return (res.rowCount ?? 0) > 0;
 }
