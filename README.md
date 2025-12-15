@@ -1,32 +1,77 @@
-# SweetShop Backend (PERN scaffold)
+# SweetShop 🍬  
+**Full-Stack PERN Application (PostgreSQL, Express, React)**
 
-This is a minimal TypeScript + Express backend scaffold using PostgreSQL (Neon-ready), Jest + Supertest for testing, and dotenv for env vars. It follows a TDD-friendly directory layout.
+## 📌 Repository Links
 
-Quick commands (Windows cmd.exe):
+- **Backend Repo:** https://github.com/playerishAsh/SweetShop  
+- **Frontend Repo:** https://github.com/playerishAsh/shop-sweet-front  
+- **Live Frontend:** https://shop-sweet-front.lovable.app/ :contentReference[oaicite:1]{index=1}
 
-```cmd
-npm install
-npm test
-npm run dev
-```
+SweetShop is a full-stack e-commerce prototype built using the **PERN stack** (PostgreSQL, Express, React, Node.js).  
+It includes a TypeScript + Express backend, a React frontend, and follows modern best practices including environment-based configuration and TDD with Jest + Supertest.
 
-TDD & Test DB
----------------
+---
 
-This project expects a PostgreSQL database for integration tests. Set a TEST or default
-`DATABASE_URL` in your environment before running the auth integration tests. Example:
+## 🧩 Table of Contents
 
-```cmd
-set DATABASE_URL=postgres://user:password@localhost:5432/sweetshop_test
-npm test
-```
+- 📌 Project Overview  
+- 🛠️ Tech Stack  
+- 🚀 Requirements  
+- 🔧 Installation & Setup  
+  - Backend  
+  - Frontend  
+- 🧪 Running Tests  
+- 📸 Screenshots  
+- ✨ My AI Usage (Mandatory)  
+- 📄 License  
+- 👤 Author
 
-The tests create and drop a `users` table during their lifecycle; ensure your test DB
-is isolated from production data.
+---
 
-PowerShell example:
+## 📌 Project Overview
 
-```powershell
-$env:DATABASE_URL = "postgres://user:password@localhost:5432/sweetshop_test"
-npm test
-```
+SweetShop is designed as a scalable template for building an e-commerce application. It separates frontend and backend concerns cleanly:
+
+- **Backend:** Express API in TypeScript, connected to PostgreSQL
+- **Frontend:** React app deployed live at the link above
+- **Testing:** Jest + Supertest for backend routes
+- **Environments:** dotenv for config
+
+This makes SweetShop suitable for learning, expansion, or production refinement.
+
+---
+
+## 🛠️ Tech Stack
+
+**Backend**  
+- Node.js  
+- Express  
+- TypeScript  
+- PostgreSQL  
+- Jest & Supertest  
+- dotenv  
+
+**Frontend**  
+- React  
+- Vite (or Create React App based on repo)  
+- Tailwind / CSS
+
+---
+
+## 🚀 Requirements
+
+Ensure you have installed:
+
+✔ Node.js  
+✔ npm  
+✔ PostgreSQL (local or cloud)
+
+---
+
+## 🔧 Installation & Setup
+
+### 📁 Clone the Repos
+
+```bash
+git clone https://github.com/playerishAsh/SweetShop
+git clone https://github.com/playerishAsh/shop-sweet-front
